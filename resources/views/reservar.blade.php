@@ -34,7 +34,6 @@
 
             <label>Hora fin:</label>
             <select name="horaFin" required>
-                <option value="08:30">Primera hora (08:30)</option>
                 <option value="09:22">Segunda hora (09:22)</option>
                 <option value="10:32">Tercera hora (10:32)</option>
                 <option value="11:24">Cuarta hora (11:24)</option>
