@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class Reserva extends Model
 {
     //
-    protected $fillable = ['carro', 'profesor', 'horaInicio', 'horaFin'];
+    protected $fillable = ['carro', 'profesor', 'inicio', 'fin'];
 }

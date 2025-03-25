@@ -14,8 +14,8 @@ class ReservaController extends Controller
     {
         //
         date_default_timezone_set("Europe/Madrid");
-        $hora = date('H:i:s', time());
-        Reserva::where('horaFin', '<', $hora)->delete();
+        $fecha = date('d-m-y H:i:s', time());
+        Reserva::where('fin', '<', $fecha)->delete();
 
         $reservas = Reserva::all();
         return view('index', compact('reservas'));
@@ -36,30 +36,45 @@ class ReservaController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        $existeReserva = Reserva::where('carro', $request->carro)->where(function($query) use ($request) {
-            $query->whereBetween('horaInicio', [$request->horaInicio, $request->horaFin])
-            ->orWhereBetween('horaFin', [$request->horaInicio, $request->horaFin])
-            ->orWhere(function($query) use ($request) {
-                $query->where('horaInicio', '<', $request->horaInicio)
-                ->where('horaFin', '>', $request->horaFin);
+
+        $inicio = \Carbon\Carbon::parse($request->inicio);
+        $fin = \Carbon\Carbon::parse($request->fin);
+
+        // Inicio no puede ser mayor que la actual
+        if ($inicio->isBefore(\Carbon\Carbon::now())) {
+            return redirect()->route('reservas.create')->with('error', 'La fecha de inicio no puede ser anterior a la fecha actual.');
+        }
+
+        // Fin no puede ser menor que inicio
+        if ($fin->isBefore($inicio)) {
+            return redirect()->route('reservas.create')->with('error', 'La fecha de fin debe ser posterior a la fecha de inicio.');
+        }
+
+        // Ya hay una reserva dentro del horario
+        $existeReserva = Reserva::where('carro', $request->carro)
+        ->where(function($query) use ($inicio, $fin) {
+            $query->whereBetween('inicio', [$inicio, $fin])
+                  ->orWhereBetween('fin', [$inicio, $fin])
+                  ->orWhere(function($query) use ($inicio, $fin) {
+                    $query->where('inicio', '<', $inicio)
+                          ->where('fin', '>', $fin);
             });
         })
         ->exists();
 
-    if ($existeReserva) {
-        return redirect()->route('reservas.create')->with('error', 'El carro ya está reservado dentro del horario.');
-    } else {
-        Reserva::create([
-            'carro' => $request->carro,
-            'profesor' => $request->profesor,
-            'horaInicio' => $request->horaInicio,
-            'horaFin' => $request->horaFin,
-        ]);
+        if ($existeReserva) {
+            return redirect()->route('reservas.create')->with('error', 'El carro ya está reservado en ese horario.');
+        } else {
+            Reserva::create([
+                'carro' => $request->carro,
+                'profesor' => $request->profesor,
+                'inicio' => $inicio,
+                'fin' => $fin,
+            ]);
 
-        return redirect()->route('reservas.index')->with('success', 'Reserva creada correctamente.');
+            return redirect()->route('reservas.index')->with('success', 'Reserva creada correctamente.');
+        }
     }
-}
 
 
     /**

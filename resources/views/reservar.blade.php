@@ -24,25 +24,11 @@
                 <option value="Carro 4">Carro 4</option>
             </select><br/>
 
-            <label>Hora inicio:</label>
-            <select name="horaInicio" required>
-                <option value="08:30" selected>Primera hora (08:30)</option>
-                <option value="09:22">Segunda hora (09:22)</option>
-                <option value="10:32">Tercera hora (10:32)</option>
-                <option value="11:24">Cuarta hora (11:24)</option>
-                <option value="12:34">Quinta hora (12:34)</option>
-                <option value="13:26">Sexta hora (13:26)</option>
-            </select><br/>
+            <label>Fecha y hora de inicio:</label>
+            <input type="datetime-local" name="inicio"/><br/>
 
-            <label>Hora fin:</label>
-            <select name="horaFin" required>
-                <option value="09:22">Segunda hora (09:22)</option>
-                <option value="10:32">Tercera hora (10:32)</option>
-                <option value="11:24">Cuarta hora (11:24)</option>
-                <option value="12:34">Quinta hora (12:34)</option>
-                <option value="13:26">Sexta hora (13:26)</option>
-                <option value="14:16" selected>Fin lectivo (14:16)</option>
-            </select><br/>
+            <label>Fecha y hora de fin:</label>
+            <input type="datetime-local" name="fin"/><br/>
 
         <button type="submit">Reservar</button>
         @if(session('error'))
@@ -51,6 +37,6 @@
     </form><br/>
 
     <a href="{{ route('reservas.cerrarSesion') }}">Cerrar sesión</a>
-    <br/><small>Hora actual: {{ date('H:i:s', time()); }}</small>
+    <br/><small>Fecha actual: {{ date('d-m-y H:i:s', time()); }}</small>
 </body>
 </html>

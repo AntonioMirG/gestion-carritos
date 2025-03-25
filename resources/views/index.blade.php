@@ -20,13 +20,14 @@
     @foreach ($reservas as $reserva)
         <div>
             <h1>{{$reserva->carro}}</h1>
-            <p>Horas reservadas: {{$reserva->horaInicio}}-{{$reserva->horaFin}}</p>
+            <p>Reserva inicio: {{$reserva->inicio}}</p>
+            <p>Reserva fin: {{$reserva->fin}}</p>
             <p>Reservado por: {{$reserva->profesor}}</p>
         </div>
         <hr/>
     @endforeach
 
     <a href="{{ route('reservas.cerrarSesion') }}">Cerrar sesión</a>
-    <br/><small>Hora actual: {{ date('H:i:s', time()); }}</small>
+    <br/><small>Fecha actual: {{ date('d-m-y H:i:s', time()); }}</small>
 </body>
 </html>

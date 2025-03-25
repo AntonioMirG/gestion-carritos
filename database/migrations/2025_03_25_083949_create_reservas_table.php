@@ -16,8 +16,8 @@ return new class extends Migration
             $table->timestamps();
             $table->string('carro');
             $table->string('profesor');
-            $table->time('horaInicio');
-            $table->time('horaFin');
+            $table->datetime('inicio');
+            $table->datetime('fin');
         });
     }
 
