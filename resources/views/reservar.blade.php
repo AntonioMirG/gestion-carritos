@@ -7,7 +7,7 @@
 </head>
 <body>
         <h1>Gestión de Carros - Reservar</h1>
-        <p>Registrado como: {{ auth()->user()->name }}!</p>
+        <p>Has iniciado sesión como: {{ auth()->user()->name }}</p>
 
         <a href="{{ route('reservas.index') }}">Lista de reservas</a>
 
