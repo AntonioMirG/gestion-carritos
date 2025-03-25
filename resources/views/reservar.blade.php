@@ -9,9 +9,7 @@
         <h1>Gestión de carros - Reservar</h1>
         <p>Registrado como: {{ auth()->user()->name }}!</p>
 
-        <a href="{{ route('reservas.index') }}">
-            Lista de reservas
-        </a>
+        <a href="{{ route('reservas.index') }}">Lista de reservas</a>
 
         <form action="{{ route('reservas.store') }}" method="POST">
             @csrf
@@ -41,16 +39,14 @@
                 <option value="10:32">Tercera hora (10:32)</option>
                 <option value="11:24">Cuarta hora (11:24)</option>
                 <option value="12:34">Quinta hora (12:34)</option>
-                <option value="13:26" selected>Sexta hora (13:26)</option>
+                <option value="13:26">Sexta hora (13:26)</option>
                 <option value="14:16" selected>Fin lectivo (14:16)</option>
             </select>
 
         <button type="submit">Reservar</button>
     </form>
 
-    <a href="{{ route('reservas.cerrarSesion') }}">
-        Cerrar sesión
-    </a>
+    <a href="{{ route('reservas.cerrarSesion') }}">Cerrar sesión</a>
     <br/><small>Hora actual: {{ date('H:i:s', time()); }}</small>
 </body>
 </html>
