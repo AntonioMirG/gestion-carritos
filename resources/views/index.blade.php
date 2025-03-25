@@ -20,5 +20,6 @@
     <a href="{{ route('reservas.cerrarSesion') }}">
         Cerrar sesión
     </a>
+    <br/><small>Hora actual: {{ date('H:i:s', time()); }}</small>
 </body>
 </html>

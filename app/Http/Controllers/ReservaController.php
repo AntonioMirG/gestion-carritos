@@ -13,6 +13,10 @@ class ReservaController extends Controller
     public function index()
     {
         //
+        date_default_timezone_set("Europe/Madrid");
+        $hora = date('H:i:s', time());
+        Reserva::where('horaFin', '<', $hora)->delete();
+
         $reservas = Reserva::all();
         return view('index', compact('reservas'));
     }
@@ -23,6 +27,7 @@ class ReservaController extends Controller
     public function create()
     {
         //
+        date_default_timezone_set("Europe/Madrid");
         return view('reservar');
     }
 
