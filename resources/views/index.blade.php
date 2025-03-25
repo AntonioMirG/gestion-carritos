@@ -9,7 +9,13 @@
     <h1>Gestión de Carros - Lista de Reservas</h1>
     <p>Has iniciado sesión como: {{ auth()->user()->name }}</p>
 
-    <a href="{{ route('reservas.create') }}">Reservar</a>
+    <a href="{{ route('reservas.create') }}">Reservar carro</a>
+
+    @if(session('success'))
+        <p style="color:green">{{ session('success') }}</p>
+    @endif
+
+    <hr/>
 
     @foreach ($reservas as $reserva)
         <div>

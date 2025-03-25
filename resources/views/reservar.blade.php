@@ -9,10 +9,12 @@
         <h1>Gestión de Carros - Reservar</h1>
         <p>Has iniciado sesión como: {{ auth()->user()->name }}</p>
 
-        <a href="{{ route('reservas.index') }}">Lista de reservas</a>
+        <a href="{{ route('reservas.index') }}">Ir a la lista de reservas</a>
 
         <form action="{{ route('reservas.store') }}" method="POST">
             @csrf
+            <br/>
+            
             <input type="hidden" name="profesor" value="{{ auth()->user()->name }}"/>
             <label>Carro:</label>
             <select name="carro" required>
@@ -20,7 +22,7 @@
                 <option value="Carro 2">Carro 2</option>
                 <option value="Carro 3">Carro 3</option>
                 <option value="Carro 4">Carro 4</option>
-            </select>
+            </select><br/>
 
             <label>Hora inicio:</label>
             <select name="horaInicio" required>
@@ -30,7 +32,7 @@
                 <option value="11:24">Cuarta hora (11:24)</option>
                 <option value="12:34">Quinta hora (12:34)</option>
                 <option value="13:26">Sexta hora (13:26)</option>
-            </select>
+            </select><br/>
 
             <label>Hora fin:</label>
             <select name="horaFin" required>
@@ -40,10 +42,13 @@
                 <option value="12:34">Quinta hora (12:34)</option>
                 <option value="13:26">Sexta hora (13:26)</option>
                 <option value="14:16" selected>Fin lectivo (14:16)</option>
-            </select>
+            </select><br/>
 
         <button type="submit">Reservar</button>
-    </form>
+        @if(session('error'))
+            <p style="color:red">{{ session('error') }}</p>
+        @endif
+    </form><br/>
 
     <a href="{{ route('reservas.cerrarSesion') }}">Cerrar sesión</a>
     <br/><small>Hora actual: {{ date('H:i:s', time()); }}</small>

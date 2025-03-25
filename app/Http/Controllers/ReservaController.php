@@ -37,14 +37,30 @@ class ReservaController extends Controller
     public function store(Request $request)
     {
         //
+        $existeReserva = Reserva::where('carro', $request->carro)->where(function($query) use ($request) {
+            $query->whereBetween('horaInicio', [$request->horaInicio, $request->horaFin])
+            ->orWhereBetween('horaFin', [$request->horaInicio, $request->horaFin])
+            ->orWhere(function($query) use ($request) {
+                $query->where('horaInicio', '<', $request->horaInicio)
+                ->where('horaFin', '>', $request->horaFin);
+            });
+        })
+        ->exists();
+
+    if ($existeReserva) {
+        return redirect()->route('reservas.create')->with('error', 'El carro ya está reservado dentro del horario.');
+    } else {
         Reserva::create([
             'carro' => $request->carro,
             'profesor' => $request->profesor,
             'horaInicio' => $request->horaInicio,
             'horaFin' => $request->horaFin,
         ]);
-        return redirect()->route('reservas.index');
+
+        return redirect()->route('reservas.index')->with('success', 'Reserva creada correctamente.');
     }
+}
+
 
     /**
      * Display the specified resource.
