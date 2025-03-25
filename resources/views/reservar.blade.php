@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de carros - Reservar</title>
+    <title>Gestión de Carros - Reservar</title>
 </head>
 <body>
-        <h1>Gestión de carros - Reservar</h1>
+        <h1>Gestión de Carros - Reservar</h1>
         <p>Registrado como: {{ auth()->user()->name }}!</p>
 
         <a href="{{ route('reservas.index') }}">Lista de reservas</a>

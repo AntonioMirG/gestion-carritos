@@ -6,7 +6,7 @@
     <title>Gestión de Carros - Lista de Reservas</title>
 </head>
 <body>
-    <h1>Gestión de carros - Lista de Reservas</h1>
+    <h1>Gestión de Carros - Lista de Reservas</h1>
     <p>Registrado como: {{ auth()->user()->name }}!</p>
 
     <a href="{{ route('reservas.create') }}">Reservar</a>
