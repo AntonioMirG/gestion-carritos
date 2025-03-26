@@ -72,18 +72,7 @@
           },
 
           // Se definen los eventos que se van a mostrar en el calendario
-          events: [
-            {
-              title: reservaTitle,
-              description: reservaDescription,
-              start: reservaStartDate,
-              end: reservaEndDate,
-              color: reservaColor,
-              profesor: reservaProfesor,
-              carro: reservaCarro,
-              numeroOrdenadores: reservaNumeroOrdenadores,
-            },
-          ],
+          events: 'http://localhost/calendario/php/eventos.php',
 
           // Esta función se ejecuta cuando se hace clic en un evento
           eventClick: function (event) {
@@ -127,7 +116,7 @@
           <div class="modal-body">
             <!-- Descripción del evento (se actualiza dinámicamente con la descripción del evento) -->
             <p id="modalDescription"></p>
-            <p>Profesor:<span id="modalProfesor"> </span></p>
+            <p>Profesor: <span id="modalProfesor"> </span></p>
             <p>Carro: <span id="modalCarro"></span></p>
             <p>
               Número de ordenadores: <span id="modalNumeroOrdenadores"></span>
@@ -135,7 +124,13 @@
           </div>
           <div class="modal-footer">
             <!-- Botones para cerrar o borrar el modal o guardar información -->
-            <button type="button" class="btn btn-secondary"data-dismiss="modal">Cerrar</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Cerrar
+            </button>
             <button type="button" class="btn btn-primary">Guardar</button>
             <button type="button" class="btn btn-primary-red">Borrar</button>
           </div>
