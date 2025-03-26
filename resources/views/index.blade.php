@@ -23,6 +23,14 @@
             <p>Reserva inicio: {{$reserva->inicio}}</p>
             <p>Reserva fin: {{$reserva->fin}}</p>
             <p>Reservado por: {{$reserva->profesor}}</p>
+            <!--Cambiar "Admin" por el nombre del usuario administrador-->
+            @if(auth()->user()->name === $reserva->profesor || auth()->user()->name === "Admin")
+                <form action="{{ route('reservas.destroy', $reserva->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit">Borrar reserva</button>
+                </form>
+            @endif
         </div>
         <hr/>
     @endforeach

@@ -7,6 +7,10 @@
 </head>
 <body>
     <h1>Gestión de Carros - Iniciar Sesión</h1>
-    <a href="{{ route('auth.google.redirect') }}" class="btn bg-blue-100 p-3 shadow-sm border rounded-md text-blue-900">Iniciar sesión con Google</a>
+    <button>
+        <a href="{{ route('auth.google.redirect') }}" style="text-decoration:none; color:black">Iniciar sesión con Google</a>
+    </button>
+
+    <br/><small>Fecha actual: {{ date('d-m-y H:i:s', time()); }}</small>
 </body>
 </html>

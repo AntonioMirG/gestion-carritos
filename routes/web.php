@@ -18,5 +18,5 @@ Route::get('/api/auth/google/callback', [GoogleAuthController::class, 'callback'
 Route::get('/index', [ReservaController::class, 'index'])->middleware('auth')->name('reservas.index');
 Route::get('/reservar', [ReservaController::class, 'create'])->middleware('auth')->name('reservas.create');
 Route::post('/index', [ReservaController::class, 'store'])->middleware('auth')->name('reservas.store');
-
 Route::get('/', [ReservaController::class, 'cerrarSesion'])->name('reservas.cerrarSesion');
+Route::delete('/index/{id}', [ReservaController::class, 'destroy'])->name('reservas.destroy'); 

@@ -14,7 +14,7 @@ class ReservaController extends Controller
     {
         //
         date_default_timezone_set("Europe/Madrid");
-        $fecha = date('d-m-y H:i:s', time());
+        $fecha = date('y-m-d H:i:s', time());
         Reserva::where('fin', '<', $fecha)->delete();
 
         $reservas = Reserva::all();
@@ -40,7 +40,7 @@ class ReservaController extends Controller
         $inicio = \Carbon\Carbon::parse($request->inicio);
         $fin = \Carbon\Carbon::parse($request->fin);
 
-        // Inicio no puede ser mayor que la actual
+        // Inicio no puede ser mayor que la fecha actual
         if ($inicio->isBefore(\Carbon\Carbon::now())) {
             return redirect()->route('reservas.create')->with('error', 'La fecha de inicio no puede ser anterior a la fecha actual.');
         }
@@ -50,7 +50,7 @@ class ReservaController extends Controller
             return redirect()->route('reservas.create')->with('error', 'La fecha de fin debe ser posterior a la fecha de inicio.');
         }
 
-        // Ya hay una reserva dentro del horario
+        // Ya hay una reserva del carro dentro del horario
         $existeReserva = Reserva::where('carro', $request->carro)
         ->where(function($query) use ($inicio, $fin) {
             $query->whereBetween('inicio', [$inicio, $fin])
@@ -64,7 +64,7 @@ class ReservaController extends Controller
 
         if ($existeReserva) {
             return redirect()->route('reservas.create')->with('error', 'El carro ya está reservado en ese horario.');
-        } else {
+        }
             Reserva::create([
                 'carro' => $request->carro,
                 'profesor' => $request->profesor,
@@ -73,7 +73,6 @@ class ReservaController extends Controller
             ]);
 
             return redirect()->route('reservas.index')->with('success', 'Reserva creada correctamente.');
-        }
     }
 
 
@@ -104,9 +103,11 @@ class ReservaController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Reserva $reserva)
+    public function destroy($id)
     {
-        //
+        $reserva = Reserva::findOrFail($id);
+        $reserva->delete();
+        return redirect()->route('reservas.index')->with('success', 'Reserva eliminada correctamente.');
     }
 
     public function cerrarSesion() 
