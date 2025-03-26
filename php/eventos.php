@@ -1,30 +1,45 @@
 <?php
-
-header('content-type: application/json; charset=utf-8');
-
+header('Content-Type: application/json');
 $pdo = new PDO("mysql:dbname=gestion_carritos;host=127.0.0.1", "root", "");
 
+// Comprobamos si se ha enviado el formulario con datos
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Recogemos los datos del formulario
+    $titulo = $_POST['titulo'];
+    $descripcion = $_POST['descripcion'];
+    $profesor = $_POST['profesor'];
+    $carro = $_POST['carro'];
+    $numeroOrdenadores = $_POST['numeroOrdenadores'];
+    $fechaInicio = $_POST['fechaInicio'];
 
-//Seleccionar eventos
-$sql = $pdo->prepare("SELECT * FROM reserva");
-$sql->execute();
+    // Insertamos los datos en la base de datos
+    $sql = "INSERT INTO reserva (Titulo, description, ID_Profesor, ID_Carro, Numero_de_ordenadores, Fecha_Hora_Inicio) 
+            VALUES (:titulo, :descripcion, (SELECT ID_Profesor FROM profesor WHERE Nombre = :profesor LIMIT 1), 
+            (SELECT ID_Carro FROM carro WHERE Nombre = :carro LIMIT 1), :numeroOrdenadores, :fechaInicio)";
+    $stmt = $pdo->prepare($sql);
 
-$resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
+    // Ejecutamos la consulta con los datos
+    $stmt->execute([
+        ':titulo' => $titulo,
+        ':descripcion' => $descripcion,
+        ':profesor' => $profesor,
+        ':carro' => $carro,
+        ':numeroOrdenadores' => $numeroOrdenadores,
+        ':fechaInicio' => $fechaInicio
+    ]);
 
-// Aquí deberías asegurarte de que las claves coincidan con los nombres de las columnas
-foreach ($resultado as $evento) {
-    $eventoData = [
-        'title' => $evento['Titulo'], // Usar 'Titulo' en lugar de 'titulo'
-        'start' => $evento['Fecha_Hora_Inicio'], // Usar 'Fecha_Hora_Inicio'
-        'end' => $evento['Fecha_Hora_Fin'], // Usar 'Fecha_Hora_Fin'
-        'description' => $evento['description'], // Usar 'description'
-        'profesor' => $evento['ID_Profesor'], // Usar 'ID_Profesor' si es necesario
-        'carro' => $evento['ID_Carro'], // Usar 'ID_Carro'
-        'numeroOrdenadores' => $evento['Numero de ordenadores'], // Usar 'Numero de ordenadores'
-        'color' => '#c95832' // Color predeterminado, puedes modificar según lo que necesites
-    ];
-    $eventos[] = $eventoData;
+    // Respondemos con un mensaje de éxito
+    echo json_encode(['success' => true, 'message' => 'Reserva creada exitosamente']);
+    exit;
 }
 
-// Se devuelve el resultado como JSON
-echo json_encode($eventos);
+// Si es una solicitud GET, mostramos los eventos existentes
+$sql = $pdo->prepare("SELECT r.Titulo, r.Fecha_Hora_Inicio as start, r.Fecha_Hora_Fin as end, r.description, p.Nombre as profesor, c.Nombre as carro 
+                     FROM reserva r 
+                     JOIN profesor p ON r.ID_Profesor = p.ID_Profesor 
+                     JOIN carro c ON r.ID_Carro = c.ID_Carro");
+
+$sql->execute();
+$result = $sql->fetchAll(PDO::FETCH_ASSOC);
+echo json_encode($result);
+?>

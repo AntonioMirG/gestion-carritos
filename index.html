@@ -39,18 +39,101 @@
       </div>
     </div>
 
+    <div
+      class="modal fade"
+      id="exampleModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitle">Titulo de la reserva</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Titulo: <span id="modalDescription"></span></p>
+            <p>Profesor: <span id="modalProfesor"> </span></p>
+            <p>Carro: <span id="modalCarro"></span></p>
+            <p>
+              Número de ordenadores: <span id="modalNumeroOrdenadores"></span>
+            </p>
+            <form id="formReserva" method="POST">
+              <input
+                type="text"
+                id="titulo"
+                name="titulo"
+                placeholder="Titulo"
+                required
+                class="form-control mb-2"
+              />
+              <input
+                type="text"
+                id="descripcion"
+                name="descripcion"
+                placeholder="Descripción"
+                required
+                class="form-control mb-2"
+              />
+              <input
+                type="text"
+                id="profesor"
+                name="profesor"
+                placeholder="Profesor"
+                required
+                class="form-control mb-2"
+              />
+              <input
+                type="text"
+                id="carro"
+                name="carro"
+                placeholder="Carro"
+                required
+                class="form-control mb-2"
+              />
+              <input
+                type="number"
+                id="numeroOrdenadores"
+                name="numeroOrdenadores"
+                placeholder="Número de ordenadores"
+                required
+                class="form-control mb-2"
+              />
+              <input
+                type="datetime-local"
+                id="fechaInicio"
+                name="fechaInicio"
+                class="form-control mb-2"
+              />
+              <button type="submit" class="btn btn-success btn-block">
+                Crear Reserva
+              </button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       $(document).ready(function () {
-        // Se definen las variables personalizadas para la reserva
-        var reservaTitle = "Reunión con el equipo"; // Título la reserva
-        var reservaProfesor = "Profesor"; // Profesor la reserva
-        var reservaCarro = "Carro1"; // Carro de la reserva
-        var reservaNumeroOrdenadores = "10"; // Número de ordenadores la reserva
-        var reservaDescription = "Descripción de la reunión"; // Descripción la reserva
-        var reservaStartDate = "2025-03-26"; // Fecha de inicio de la reserva
-        var reservaEndDate = "2025-03-28"; // Fecha de fin de la reserva
-        var reservaColor = "#c95832"; // Color de la reserva
-
         // Se inicializa el calendario
         $("#CalendarioWeb").fullCalendar({
           // Se define el encabezado (botones y vista)
@@ -67,75 +150,64 @@
               "Día Seleccionado: " + date.format("DD/MM/YYYY")
             );
 
-            // Se abre el modal para mostrar más información
-            $("#exampleModal").modal("show");
+            // Aquí agregamos una petición AJAX para comprobar si hay eventos para el día seleccionado
+            $.ajax({
+              url: "http://localhost/calendario/php/eventos.php", // Ruta a la API PHP
+              method: "GET",
+              dataType: "json",
+              success: function (data) {
+                var eventoEncontrado = false;
+
+                // Buscamos si hay eventos para la fecha seleccionada
+                data.forEach(function (evento) {
+                  if (
+                    moment(evento.start).format("YYYY-MM-DD") ===
+                    date.format("YYYY-MM-DD")
+                  ) {
+                    eventoEncontrado = true;
+                    // Si encontramos un evento para el día, actualizamos los detalles del modal
+                    $("#modalTitle").text(evento.title);
+                    $("#modalDescription").text(evento.description);
+                    $("#modalProfesor").text(evento.profesor);
+                    $("#modalCarro").text(evento.carro);
+                    $("#modalNumeroOrdenadores").text(evento.numeroOrdenadores);
+                  }
+                });
+
+                // Si no encontramos un evento, mostramos un mensaje en el modal
+                if (!eventoEncontrado) {
+                  $("#modalTitle").text("No hay eventos para este día");
+                  $("#modalDescription").text(
+                    "Este día no tiene eventos programados."
+                  );
+                  $("#modalProfesor").text("");
+                  $("#modalCarro").text("");
+                  $("#modalNumeroOrdenadores").text("");
+                }
+
+                // Abrir el modal
+                $("#exampleModal").modal("show");
+              },
+            });
           },
 
           // Se definen los eventos que se van a mostrar en el calendario
-          events: 'http://localhost/calendario/php/eventos.php',
+          events: "http://localhost/calendario/php/eventos.php", // Ruta al PHP que devuelve el JSON
 
           // Esta función se ejecuta cuando se hace clic en un evento
           eventClick: function (event) {
             // Al hacer clic en un evento, se muestra el título, la descripción y demás datos en el modal
-            $("#modalTitle").text(event.title);
-            $("#modalDescription").text(event.description);
-            $("#modalColor").val(event.color);
-            $("#modalProfesor").text(event.profesor);
-            $("#modalCarro").text(event.carro);
-            $("#modalNumeroOrdenadores").text(event.numeroOrdenadores);
+            $("#modalTitle").text(event.title); // Mostrar título de la reserva
+            $("#modalDescription").text(event.description); // Mostrar descripción
+            $("#modalProfesor").text(event.profesor); // Mostrar nombre del profesor
+            $("#modalCarro").text(event.carro); // Mostrar nombre del carro
+            $("#modalNumeroOrdenadores").text(event.numeroOrdenadores); // Mostrar número de ordenadores
 
+            // Abrir el modal
             $("#exampleModal").modal("show");
           },
         });
       });
     </script>
-
-    <!-- Modal de Bootstrap para mostrar información del evento -->
-    <div
-      class="modal fade"
-      id="exampleModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="exampleModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <!-- Título del modal (se actualiza dinámicamente con el título del evento) -->
-            <h5 class="modal-title" id="modalTitle">Modal title</h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <!-- Descripción del evento (se actualiza dinámicamente con la descripción del evento) -->
-            <p id="modalDescription"></p>
-            <p>Profesor: <span id="modalProfesor"> </span></p>
-            <p>Carro: <span id="modalCarro"></span></p>
-            <p>
-              Número de ordenadores: <span id="modalNumeroOrdenadores"></span>
-            </p>
-          </div>
-          <div class="modal-footer">
-            <!-- Botones para cerrar o borrar el modal o guardar información -->
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Cerrar
-            </button>
-            <button type="button" class="btn btn-primary">Guardar</button>
-            <button type="button" class="btn btn-primary-red">Borrar</button>
-          </div>
-        </div>
-      </div>
-    </div>
   </body>
 </html>
