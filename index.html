@@ -4,23 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calendario</title>
-
-    <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
     />
-    <!-- FullCalendar CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.2.0/fullcalendar.min.css" />
-
-    <!-- jQuery -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.2.0/fullcalendar.min.css"
+    />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Moment.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <!-- FullCalendar JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.2.0/fullcalendar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.2.0/locale/es.js"></script>
-    <!-- Bootstrap JS -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
   </head>
   <body>
@@ -28,33 +23,90 @@
       <div id="CalendarioWeb"></div>
     </div>
 
-    <!-- Modal de detalles -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <!-- Modal para crear una reserva -->
+    <div
+      class="modal fade"
+      id="exampleModal"
+      tabindex="-1"
+      role="dialog"
+      aria-hidden="true"
+    >
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modalTitle">Crear Reserva</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body">
-            <form id="formReserva" method="POST">
-              <input type="text" id="titulo" name="titulo" placeholder="Título" required class="form-control mb-2" />
-              <input type="text" id="descripcion" name="descripcion" placeholder="Descripción" required class="form-control mb-2" />
-              <select id="profesor" name="profesor" required class="form-control mb-2">
-                <option value="">Seleccione un profesor</option>
-              </select>
-              <select id="carro" name="carro" required class="form-control mb-2">
-                <option value="">Seleccione un carro</option>
-              </select>
-              <input type="number" id="numeroOrdenadores" name="numeroOrdenadores" placeholder="Número de ordenadores" required class="form-control mb-2" />
-              <input type="datetime-local" id="fechaInicio" name="fechaInicio" class="form-control mb-2" />
-              <button type="submit" class="btn btn-success btn-block">Crear Reserva</button>
+            <form id="formReserva">
+              <input
+                type="text"
+                id="titulo"
+                name="titulo"
+                placeholder="Título"
+                required
+                class="form-control mb-2"
+              />
+              <input
+                type="text"
+                id="descripcion"
+                name="descripcion"
+                placeholder="Descripción"
+                required
+                class="form-control mb-2"
+              />
+              <select
+                id="profesor"
+                name="profesor"
+                required
+                class="form-control mb-2"
+              ></select>
+              <select
+                id="carro"
+                name="carro"
+                required
+                class="form-control mb-2"
+              ></select>
+              <input
+                type="number"
+                id="numeroOrdenadores"
+                name="numeroOrdenadores"
+                placeholder="Número de ordenadores"
+                required
+                class="form-control mb-2"
+              />
+              <input
+                type="datetime-local"
+                id="fechaInicio"
+                name="fechaInicio"
+                class="form-control mb-2"
+              />
+              <input
+                type="datetime-local"
+                id="fechaFin"
+                name="fechaFin"
+                class="form-control mb-2"
+              />
+              <button type="submit" class="btn btn-success btn-block">
+                Crear Reserva
+              </button>
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Cerrar
+            </button>
           </div>
         </div>
       </div>
@@ -62,39 +114,42 @@
 
     <script>
       $(document).ready(function () {
-        // Obtener opciones de profesores y carros
-        fetch("http://localhost/calendario/php/eventos.php?action=getOptions")
-          .then((response) => response.json())
-          .then((data) => {
+        let profesoresOptions = [];
+        let carrosOptions = [];
+
+        // Cargar las opciones de profesores y carros
+        $.get(
+          "http://localhost/calendario/php/eventos.php?action=getOptions",
+          function (data) {
             if (data.success) {
-              // Rellenar el select de profesores
-              const profesorSelect = $("#profesor");
-              data.profesores.forEach((profesor) => {
-                profesorSelect.append(
-                  `<option value="${profesor.Nombre}">${profesor.Nombre}</option>`
-                );
-              });
+              profesoresOptions = data.profesores;
+              carrosOptions = data.carros;
 
-              // Rellenar el select de carros
-              const carroSelect = $("#carro");
-              data.carros.forEach((carro) => {
-                carroSelect.append(
-                  `<option value="${carro.Nombre}">${carro.Nombre}</option>`
-                );
-              });
+              // Llenar los selects
+              $("#profesor").html(
+                data.profesores
+                  .map(
+                    (p) =>
+                      `<option value="${p.ID_Profesor}">${p.Nombre}</option>`
+                  )
+                  .join("")
+              );
+              $("#carro").html(
+                data.carros
+                  .map(
+                    (c) => `<option value="${c.ID_Carro}">${c.Nombre}</option>`
+                  )
+                  .join("")
+              );
             } else {
-              alert("Error al cargar las opciones: " + data.message);
+              alert("Error al cargar las opciones.");
             }
-          })
-          .catch((error) => {
-            console.error("Error al cargar las opciones:", error);
-          });
+          }
+        );
 
-        // Manejar el envío del formulario
+        // Enviar el formulario de reserva
         $("#formReserva").submit(function (e) {
-          e.preventDefault(); // Evitar el envío por defecto del formulario
-
-          // Recoger los datos del formulario
+          e.preventDefault();
           const data = {
             titulo: $("#titulo").val(),
             descripcion: $("#descripcion").val(),
@@ -102,45 +157,59 @@
             carro: $("#carro").val(),
             numeroOrdenadores: $("#numeroOrdenadores").val(),
             fechaInicio: $("#fechaInicio").val(),
+            fechaFin: $("#fechaFin").val(),
           };
-
-          // Enviar los datos al servidor
-          fetch("http://localhost/calendario/php/eventos.php", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams(data).toString(),
-          })
-            .then((response) => response.json())
-            .then((result) => {
+          $.post(
+            "http://localhost/calendario/php/eventos.php",
+            data,
+            function (result) {
               if (result.success) {
                 alert(result.message);
-                $("#exampleModal").modal("hide"); // Cerrar el modal
-                $("#CalendarioWeb").fullCalendar("refetchEvents"); // Recargar eventos
+                $("#exampleModal").modal("hide");
+                $("#CalendarioWeb").fullCalendar("refetchEvents");
               } else {
                 alert("Error: " + result.message);
               }
-            })
-            .catch((error) => {
-              console.error("Error al guardar la reserva:", error);
-            });
+            }
+          );
         });
 
-        // Cargar el calendario
+        // Inicializar el calendario
         $("#CalendarioWeb").fullCalendar({
-          events: "http://localhost/calendario/php/eventos.php", // Obtener los eventos
-          locale: "es", // Configurar idioma
+          events: function (start, end, timezone, callback) {
+            $.get(
+              "http://localhost/calendario/php/eventos.php",
+              function (data) {
+                const events = data.map((event) => {
+                  const profesor = profesoresOptions.find(
+                    (p) => p.ID_Profesor == event.ID_Profesor
+                  );
+                  const carro = carrosOptions.find(
+                    (c) => c.ID_Carro == event.ID_Carro
+                  );
+                  return {
+                    title: event.title,
+                    start: event.start,
+                    end: event.end,
+                    description: event.description,
+                    profesor: profesor ? profesor.Nombre : "Desconocido",
+                    carro: carro ? carro.Nombre : "Desconocido",
+                    numeroOrdenadores: event.numeroOrdenadores,
+                  };
+                });
+                callback(events);
+              }
+            );
+          },
+          locale: "es",
           eventRender: function (event, element) {
-            // Mostrar descripción al pasar el mouse
-            element.qtip({
-              content: event.description,
-            });
+            element.qtip({ content: event.description });
           },
           dayClick: function (date) {
-            // Mostrar el modal al hacer clic en un día
             $("#formReserva")[0].reset();
-            $("#modalTitle").text("Crear Reserva para " + date.format("YYYY-MM-DD"));
+            $("#modalTitle").text(
+              "Crear Reserva para " + date.format("DD-MM-YYYY")
+            );
             $("#exampleModal").modal("show");
           },
         });

@@ -1,98 +1,72 @@
 <?php
 header('Content-Type: application/json');
+
 $pdo = new PDO("mysql:dbname=gestion_carritos;host=127.0.0.1", "root", "");
 
-// Si es una solicitud para obtener profesores y carros
-if (isset($_GET['action']) && $_GET['action'] === 'getOptions') {
-    try {
-        // Obtener los profesores
-        $profesoresStmt = $pdo->prepare("SELECT ID_Profesor, Nombre FROM profesor");
-        $profesoresStmt->execute();
-        $profesores = $profesoresStmt->fetchAll(PDO::FETCH_ASSOC);
+// Determinar la acción (obtener eventos o crear reserva)
+$action = isset($_GET["action"]) ? $_GET["action"] : (isset($_POST["action"]) ? $_POST["action"] : null);
 
-        // Obtener los carros
-        $carrosStmt = $pdo->prepare("SELECT ID_Carro, Nombre FROM carro");
-        $carrosStmt->execute();
-        $carros = $carrosStmt->fetchAll(PDO::FETCH_ASSOC);
+if ($action === "getOptions") {
+    // Obtener opciones para profesores y carros
+    $profesores = [];
+    $carros = [];
 
-        // Devolver los datos como JSON
-        echo json_encode(['success' => true, 'profesores' => $profesores, 'carros' => $carros]);
-    } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Error al obtener los datos: ' . $e->getMessage()]);
-    }
-    exit;
-}
-
-// Comprobamos si se ha enviado el formulario con datos
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validar que todos los campos requeridos estén presentes
-    $requiredFields = ['titulo', 'descripcion', 'profesor', 'carro', 'numeroOrdenadores', 'fechaInicio'];
-    foreach ($requiredFields as $field) {
-        if (empty($_POST[$field])) {
-            echo json_encode(['success' => false, 'message' => "El campo '$field' es obligatorio"]);
-            exit;
-        }
+    // Obtener los profesores
+    $sqlProfesores = "SELECT ID_Profesor, Nombre FROM profesor";
+    $stmtProfesores = $pdo->query($sqlProfesores);
+    while ($row = $stmtProfesores->fetch(PDO::FETCH_ASSOC)) {
+        $profesores[] = $row;
     }
 
-    // Recogemos los datos del formulario
-    $titulo = $_POST['titulo'];
-    $descripcion = $_POST['descripcion'];
-    $profesor = $_POST['profesor'];
-    $carro = $_POST['carro'];
-    $numeroOrdenadores = $_POST['numeroOrdenadores'];
-    $fechaInicio = $_POST['fechaInicio'];
-
-    // Insertamos los datos en la base de datos
-    $sql = "INSERT INTO reserva (Titulo, description, ID_Profesor, ID_Carro, Numero_de_ordenadores, Fecha_Hora_Inicio) 
-            VALUES (:titulo, :descripcion, 
-            (SELECT ID_Profesor FROM profesor WHERE Nombre = :profesor LIMIT 1), 
-            (SELECT ID_Carro FROM carro WHERE Nombre = :carro LIMIT 1), 
-            :numeroOrdenadores, :fechaInicio)";
-    $stmt = $pdo->prepare($sql);
-
-    try {
-        // Ejecutamos la consulta con los datos
-        $stmt->execute([
-            ':titulo' => $titulo,
-            ':descripcion' => $descripcion,
-            ':profesor' => $profesor,
-            ':carro' => $carro,
-            ':numeroOrdenadores' => $numeroOrdenadores,
-            ':fechaInicio' => $fechaInicio
-        ]);
-
-        // Respondemos con un mensaje de éxito
-        echo json_encode(['success' => true, 'message' => 'Reserva creada exitosamente']);
-    } catch (PDOException $e) {
-        // Manejo de errores en la base de datos
-        echo json_encode(['success' => false, 'message' => 'Error al guardar la reserva: ' . $e->getMessage()]);
+    // Obtener los carros
+    $sqlCarros = "SELECT ID_Carro, Nombre FROM carro";
+    $stmtCarros = $pdo->query($sqlCarros);
+    while ($row = $stmtCarros->fetch(PDO::FETCH_ASSOC)) {
+        $carros[] = $row;
     }
-    exit;
+
+    echo json_encode(["success" => true, "profesores" => $profesores, "carros" => $carros]);
+} elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // Crear nueva reserva
+    $ID_Profesor = $_POST["profesor"];
+    $ID_Carro = $_POST["carro"];
+    $titulo = $_POST["titulo"];
+    $descripcion = $_POST["descripcion"];
+    $numeroOrdenadores = $_POST["numeroOrdenadores"];
+    $fechaInicio = $_POST["fechaInicio"];
+    $fechaFin = $_POST["fechaFin"];
+
+    // Preparar y ejecutar la inserción de la nueva reserva
+    $sqlInsert = "INSERT INTO reserva (ID_Profesor, ID_Carro, Titulo, description, Numero_de_ordenadores, Fecha_Hora_Inicio, Fecha_Hora_Fin) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $stmtInsert = $pdo->prepare($sqlInsert);
+    $resultInsert = $stmtInsert->execute([$ID_Profesor, $ID_Carro, $titulo, $descripcion, $numeroOrdenadores, $fechaInicio, $fechaFin]);
+
+    // Devolver la respuesta
+    if ($resultInsert) {
+        echo json_encode(["success" => true, "message" => "Reserva creada con éxito"]);
+    } else {
+        echo json_encode(["success" => false, "message" => "Error al crear la reserva: " . $stmtInsert->errorInfo()[2]]);
+    }
+} else {
+    // Obtener los eventos para el calendario
+    $sqlEvents = "SELECT ID_Profesor, ID_Carro, Titulo, description, Numero_de_ordenadores, Fecha_Hora_Inicio, Fecha_Hora_Fin FROM reserva";
+    $stmtEvents = $pdo->query($sqlEvents);
+
+    $events = [];
+    while ($row = $stmtEvents->fetch(PDO::FETCH_ASSOC)) {
+        $events[] = [
+            "ID_Profesor" => $row["ID_Profesor"],
+            "ID_Carro" => $row["ID_Carro"],
+            "title" => $row["Titulo"],
+            "start" => $row["Fecha_Hora_Inicio"],
+            "end" => $row["Fecha_Hora_Fin"],
+            "description" => $row["description"],
+            "numeroOrdenadores" => $row["Numero_de_ordenadores"]
+        ];
+    }
+
+    // Devolver los eventos como JSON
+    echo json_encode($events);
 }
-
-// Si es una solicitud GET, mostramos los eventos existentes
-$sql = $pdo->prepare("SELECT r.Titulo, r.Fecha_Hora_Inicio as start, r.Fecha_Hora_Fin as end, r.description, 
-                             p.Nombre as profesor, c.Nombre as carro, r.Numero_de_ordenadores as numeroOrdenadores
-                     FROM reserva r 
-                     JOIN profesor p ON r.ID_Profesor = p.ID_Profesor 
-                     JOIN carro c ON r.ID_Carro = c.ID_Carro");
-
-$sql->execute();
-$result = $sql->fetchAll(PDO::FETCH_ASSOC);
-
-// Aseguramos que los datos se devuelvan en el formato adecuado para FullCalendar
-$events = [];
-foreach ($result as $row) {
-    $events[] = [
-        'Titulo' => $row['Titulo'],
-        'start' => date('Y-m-d\TH:i:s', strtotime($row['start'])),  // Convertir al formato adecuado
-        'end' => date('Y-m-d\TH:i:s', strtotime($row['end'])),  // Convertir al formato adecuado
-        'description' => $row['description'],
-        'profesor' => $row['profesor'],
-        'carro' => $row['carro'],
-        'numeroOrdenadores' => $row['numeroOrdenadores']
-    ];
-}
-
-echo json_encode($events);  // Devolver el JSON con los eventos
 ?>
